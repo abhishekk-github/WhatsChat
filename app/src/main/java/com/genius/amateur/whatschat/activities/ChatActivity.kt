@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import com.firebase.ui.database.FirebaseRecyclerAdapter
@@ -17,6 +18,7 @@ import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_chat.*
+import kotlinx.android.synthetic.main.custom_bar_image.view.*
 
 
 class ChatActivity : AppCompatActivity() {
@@ -38,9 +40,7 @@ class ChatActivity : AppCompatActivity() {
             mLinaerLayoutManager = LinearLayoutManager(this)
             mLinaerLayoutManager!!.stackFromEnd = true
         }
-        supportActionBar?.title = "Chat Box"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
+        setupToolbar()
         mFirebaseDatabase = FirebaseDatabase.getInstance().reference
 
         mFirebaseAdapter = object : FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(FriendlyMessage::class.java, R.layout.item_message, MessageViewHolder::class.java, mFirebaseDatabase!!.child("message")) {
@@ -68,7 +68,7 @@ class ChatActivity : AppCompatActivity() {
                                 var imageUrl = dataSnapshot.child("thumb_image").value.toString()
                                 var displayName = dataSnapshot.child("display_name").value.toString()
 
-                                viewHolder.messengerTextView!!.text ="I wrote.."
+                                viewHolder.messengerTextView!!.text = "I wrote.."
                                 Picasso.get().load(imageUrl.toString()).placeholder(R.drawable.profile_img).into(viewHolder.profileImageViewRight)
                             }
 
@@ -123,6 +123,20 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun setupToolbar() {
+        supportActionBar?.title = "Chat Box"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowCustomEnabled(true)
+
+        var inflater = this.getSystemService(android.content.Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        var actionbarView = inflater.inflate(R.layout.custom_bar_image, null);
+        actionbarView.customBarName.text = intent.extras.getString("userName")
+        Picasso.get().load(intent.extras.getString("profilepic")).placeholder(R.drawable.profile_img).into(actionbarView.customBarCircleImage)
+
+        supportActionBar?.customView = actionbarView
     }
 
 
